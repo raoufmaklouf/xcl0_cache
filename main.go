@@ -25,59 +25,42 @@ func main() {
 			Port, host, path, err := parseURL(u)
 			if err == nil {
 				port, _ := strconv.Atoi(Port)
-				for x, payload := range payload_list {
-					_, r2 := attackRequest(host, port, path, payload)
-					if len(r2) > 1 {
-						//fmt.Println(r2, "\n=====================================================================================\n")
-						h2, b2, err := splitHTTPResponse(r2)
+				_, r2 := attackRequest(host, port, path, u)
+				if len(r2) > 1 {
+					//fmt.Println(r2, "\n=====================================================================================\n")
+					h2, b2, err := splitHTTPResponse(r2)
+					if err == nil {
+						scode2, err := extractStatusCode(h2)
 						if err == nil {
-							scode2, err := extractStatusCode(h2)
-							if err == nil {
-								r3 := normalRequest("GET", "/robots.txt", host, port)
-								if len(r3) > 1 {
-									//fmt.Println(r3, "\n=====================================================================================\n")
-									h3, b3, err := splitHTTPResponse(r3)
+							r3 := normalRequest("GET", path, host, port)
+							if len(r3) > 1 {
+								//fmt.Println(r3, "\n=====================================================================================\n")
+								h3, b3, err := splitHTTPResponse(r3)
+								if err == nil {
+									scode3, err := extractStatusCode(h3)
 									if err == nil {
-										scode3, err := extractStatusCode(h3)
-										if err == nil {
-											if b2 == b3 && scode2 == scode3 {
-												r4 := normalRequest("GET", "/", host, port)
-												if len(r4) > 1 {
-													//fmt.Println(r4, "\n=====================================================================================\n")
+										if b2 == b3 && scode2 == scode3 && scode3 == 412 {
 
-													h4, b4, err := splitHTTPResponse(r4)
-													if err == nil {
-														scode4, err := extractStatusCode(h4)
-														if err == nil {
-															if scode4 != scode3 || b4 != b3 {
-																//fmt.Println("\033[31m", u, "is vuln ", payload, "\033[0m")
-																fmt.Println(r2, "\n=====================================================================================\n")
-																fmt.Println(r3, "\n=====================================================================================\n")
-																fmt.Println(r4, "\n=====================================================================================\n")
-																fmt.Println("\033[31m"+u, "is vuln ", "[", x, "]", payload, "\033[0m")
+											//fmt.Println(r4, "\n=====================================================================================\n")
 
-																break
+											//fmt.Println("\033[31m", u, "is vuln ", payload, "\033[0m")
+											//fmt.Println(r2, "\n=====================================================================================\n")
+											//fmt.Println(r3, "\n=====================================================================================\n")
+											//fmt.Println(r4, "\n=====================================================================================\n")
+											fmt.Println("\033[31m"+u, "is vuln \033[0m")
 
-															}
-
-														}
-													}
-
-												}
-
-											}
 										}
+
 									}
-
 								}
-
 							}
+
 						}
+
 					}
-
 				}
-
 			}
+
 		}(url)
 		wg.Wait()
 	}
